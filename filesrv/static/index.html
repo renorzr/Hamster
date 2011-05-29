@@ -1,1 +1,65 @@
-aaa
+<html>
+<head>
+<title>Hamster</title>
+<script type="text/javascript" src="jquery-1.6.1.min.js"></script>
+<script type="text/javascript" src="jquery.tmpl.min.js"></script>
+<script type="text/javascript" src="browser.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    var browser=new Browser($("#file-browser"));
+    browser.update();
+  });
+</script>
+<style>
+ul {
+  list-style-type: none;
+}
+
+.file {
+  background-image:url("/static/images/file.png");
+  background-repeat:no-repeat;
+  background-position: 0px 0px;
+}
+
+.dir {
+  background-image:url("/static/images/dir.png");
+  background-repeat:no-repeat;
+}
+
+.entry:hover {
+  background-color: lightgray;
+}
+
+.field {
+  display: inline-block;
+}
+
+div.icon {
+  width: 21px;
+}
+
+li.entry:hover {
+  background-color:lightgray;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+<div id="file-browser"></div>
+</body>
+<script id="browser-template" type="text/x-jquery-tmpl">
+  <ul>
+    <li class="header"><a>up</a> current: ${path}</li>
+    {{each data}}
+      <li class="entry {{if dir}}dir{{else}}file{{/if}}" name="${name}">
+        <div class="field icon"></div>
+        <div class="field clickable">${name}</div>
+      </li>
+    {{/each}}
+  </ul>
+</script>
+</html>

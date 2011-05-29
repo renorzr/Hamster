@@ -1,0 +1,15 @@
+.file {
+  background-image:url('/static/images/file.png');
+}
+
+.dir {
+  background-image:url('/static/images/dir.png');
+}
+
+.entry:hover {
+  background-color: lightgray;
+}
+
+body {
+  background-color:gray;
+}
