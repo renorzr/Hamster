@@ -34,6 +34,16 @@ def download(request):
     response['Content-Disposition']="attachment; filename=\"%s\""%os.path.basename(path)
     return response
 
+def upload(request):
+    print 'headers:',request.META
+    path=request.META.get('HTTP_X_TARGET_PATH')
+    path=getSysPath(path)
+    print 'path=',path
+    f=file(path,'w')
+    f.write(request.raw_post_data)
+    f.close()
+    return JsonResponse({'status':'ok'})
+
 def getSysPath(path):
     if path.startswith('/'):
       path=path[1:]

@@ -3,6 +3,8 @@
 <title>Hamster</title>
 <script type="text/javascript" src="jquery-1.6.1.min.js"></script>
 <script type="text/javascript" src="jquery.tmpl.min.js"></script>
+<script type="text/javascript" src="jquery.cookie.js"></script>
+<script type="text/javascript" src="uploader.js"></script>
 <script type="text/javascript" src="browser.js"></script>
 <script type="text/javascript">
   $(document).ready(function(){
@@ -53,7 +55,14 @@ li.entry:hover {
 </body>
 <script id="browser-template" type="text/x-jquery-tmpl">
   <ul>
-    <li class="header"><a>up</a> current: ${path}</li>
+    <li class="toolbar">
+      <div class="field"><input id="uploader" type="file"></input></div>
+      <div class="field clickable upload-button"><img src="/static/images/upload.png" alt="upload"/></div>
+    </li>
+    <li class="address-bar">
+      <div class="field clickable up-button"><img src="/static/images/up.png" alt="parent folder" /></div>
+      <div class="field">${path}</div>
+    </li>
     {{each data}}
       <li class="entry {{if dir}}dir{{else}}file{{/if}}" name="${name}">
         <div class="field icon"></div>

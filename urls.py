@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     url(r'^$', 'filesrv.views.index'),
     url(r'^ls$', 'filesrv.views.ls'),
     url(r'^download$', 'filesrv.views.download'),
+    url(r'^upload$', 'filesrv.views.upload'),
     # url(r'^hamster/', include('hamster.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

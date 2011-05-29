@@ -1,6 +1,6 @@
 function Browser(root_){
   var self=this;
-  var path='/home/';
+  var path='/';
   var root=root_;
   self.update=function(){
     $.getJSON('/ls?path='+path,function(r){
@@ -14,6 +14,19 @@ function Browser(root_){
       $('.entry.file').click(function(){
         window.open('/download?path='+path+$(this).attr('name'));
       });
+
+      $('.up-button').click(function(){
+        self.up();
+      });
+
+      $('.upload-button').click(function(){
+        var u=new Uploader($('#uploader'));
+        u.upload('/upload',path,function(progress){
+          if (progress.done){
+            self.update();
+          }
+        });
+      });
     });
   }
 
@@ -23,5 +36,10 @@ function Browser(root_){
 
   self.getPath=function(){
     return path;
+  }
+
+  self.up=function(){
+    path=path.replace(/\/[^/]+\/$/,'/');
+    self.update();
   }
 }
