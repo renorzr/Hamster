@@ -39,10 +39,16 @@ def upload(request):
     path=request.META.get('HTTP_X_TARGET_PATH')
     path=getSysPath(path)
     print 'path=',path
-    f=file(path,'w')
+    f=file(path,'a')
     f.write(request.raw_post_data)
     f.close()
     return JsonResponse({'status':'ok'})
+
+def check(request):
+    path=request.GET.get('path')
+    path=getSysPath(path)
+    size=os.path.getsize(path)
+    return JsonResponse({'status':'ok','data':{'received':size}})
 
 def getSysPath(path):
     if path.startswith('/'):
