@@ -20,12 +20,8 @@ function Browser(root_){
       });
 
       $('.upload-button').click(function(){
-        var u=new Uploader($('#uploader'));
-        u.upload('/upload',path,function(progress){
-          if (progress.done){
-            self.update();
-          }
-        });
+        var u=new Uploader($('#uploader'),'/',path);
+        u.upload();
       });
     });
   }
