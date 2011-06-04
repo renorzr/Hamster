@@ -2,6 +2,7 @@ function Browser(root_){
   var self=this;
   var path='/';
   var root=root_;
+  var uploader=null;
   self.update=function(){
     $.getJSON('/ls?path='+path,function(r){
       root.html('');
@@ -20,8 +21,19 @@ function Browser(root_){
       });
 
       $('.upload-button').click(function(){
-        var u=new Uploader($('#uploader'),'/',path);
-        u.upload();
+        uploader=new Uploader($('#uploader'),'/',path);
+        uploader.addListener('progress',function(data){
+          var percent=Math.floor(data.sent/data.total*100);
+          $('.progress').text(percent+'%');
+        });
+        uploader.upload();
+      });
+
+      $('.stop-button').click(function(){
+        if (uploader.uploading())
+          uploader.stop();
+        else
+          uploader.resume();
       });
     });
   }

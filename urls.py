@@ -10,7 +10,8 @@ urlpatterns = patterns('',
     url(r'^ls$', 'filesrv.views.ls'),
     url(r'^download$', 'filesrv.views.download'),
     url(r'^upload$', 'filesrv.views.upload'),
-    # url(r'^hamster/', include('hamster.foo.urls')),
+    url(r'^check$', 'filesrv.views.check'),
+    # url(r'^Hamster/', include('Hamster.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

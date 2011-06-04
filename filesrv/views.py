@@ -26,7 +26,6 @@ def ls(request):
 def download(request):
     path=request.GET.get('path')
     path=getSysPath(path)
-    print 'path',path
     f=file(path,'rb')
     content=f.read()
     f.close()

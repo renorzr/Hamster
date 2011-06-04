@@ -3,64 +3,93 @@ function Uploader(fileElem,url,remotePath,callbacks){
   var file=fileElem.get(0).files[0];
   var start=0;
   var lastStart=-1;
-  var intervalId=-1;
-  var blockSize=1024*1024*10;
+  var intervalId=null;
+  var chunkSize=1024*1024*10;
   var chunkStartTime=0;
-  var EXP_CHUNK_TIME=1000;
+  var EXP_CHUNK_TIME=10000;
+  var MAX_CHUNK_SIZE=1024*1024*50;
+  var MIN_CHUNK_SIZE=1024*1024;
+  var listeners=[];
+  var xhr;
+  var chunkUploading=false;
+  var UPDATE_INTERVAL=1000;
 
   self.check=function(callback){
-    $.getJSON(url+'check',{targetPath:remotePath+file.name},function(r){
+    $.getJSON(url+'check',{path:remotePath+file.name},function(r){
       start=r.data.received;
       if (callback) callback();
     });
   }
 
   self.upload=function(){
-    intervalId=setInterval(function(){self.uploadChunk()},EXP_CHUNK_TIME);
+    if (!self.uploading())
+      chunkUploading=false;
+      intervalId=setInterval(function(){self.uploadChunk();self.updateProgress()},UPDATE_INTERVAL);
   }
 
   self.stop=function(){
-    if (intervalId!=-1) clearInterval(intervalId);
+    if (self.uploading()) {
+      clearInterval(intervalId);
+      xhr.abort();
+      intervalId=null;
+      self.fireEvent('done');
+    }
+  }
+
+  self.updateProgress=function(){
+    var elapsed=(new Date()-chunkStartTime);
+    var chunkSent=elapsed/EXP_CHUNK_TIME*chunkSize;
+    if (chunkSent>chunkSize) chunkSent=chunkSize;
+    self.fireEvent('progress',{sent:start+chunkSent,total:file.size});
   }
 
   self.uploadChunk=function(){
-    console.log('lastStart='+lastStart+' start='+start);
-    if (lastStart>=start) return;
+    if (chunkUploading || lastStart>=start) return;
+    chunkUploading=true;
     lastStart=start
 
     chunkStartTime=new Date();
 
     var chunk=self.getChunk();
+    if (!chunk) {
+      self.stop();
+      return;
+    }
 
-    var req=new XMLHttpRequest();
-    req.open('post',url+'upload',true);
-    req.setRequestHeader("Cache-Control", "no-cache");
-    req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-    req.setRequestHeader("X-Chunk-Offset", start);
-    req.setRequestHeader("X-Chunk-Size", chunk.size);
-    req.setRequestHeader("X-File-Size", file.size);
-    req.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
-    req.setRequestHeader("X-Target-Path", remotePath+file.name);
+    xhr=new XMLHttpRequest();
+    xhr.open('post',url+'upload',true);
+    xhr.setRequestHeader("Cache-Control", "no-cache");
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+    xhr.setRequestHeader("X-Chunk-Offset", start);
+    xhr.setRequestHeader("X-Chunk-Size", chunk.size);
+    xhr.setRequestHeader("X-File-Size", file.size);
+    xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+    xhr.setRequestHeader("X-Target-Path", remotePath+file.name);
      
-    req.onreadystatechange=function(){
-      if (req.readyState==4 && req.status==200) {
-//        var chunkTime=new Date()-chunkStartTime;
-//        blockSize=blockSize/chunkTime*EXP_CHUNK_TIME
-//        console.log('blockSize='+blockSize,' chunkTime='+chunkTime);
+    xhr.onreadystatechange=function(){
+      if (xhr.readyState==4 && xhr.status==200) {
+        var chunkTime=new Date()-chunkStartTime;
+        chunkSize=chunkSize/chunkTime*EXP_CHUNK_TIME
+        if (chunkSize>MAX_CHUNK_SIZE) chunkSize=MAX_CHUNK_SIZE;
+        if (chunkSize<MIN_CHUNK_SIZE) chunkSize=MIN_CHUNK_SIZE;
         start+=chunk.size;
+        self.fireEvent('progress',
+            {sent:start,total:file.size,chunkSize:chunkSize,chunkTime:chunkTime});
+        chunkUploading=false;
       }
     }
 
-    console.log('send '+chunk.size);
-    req.send(chunk);
+    xhr.send(chunk);
   }
 
   self.resume=function(){
-    self.check(function(){self.upload();});
+    if (!self.uploading())
+      self.check(function(){self.upload();});
   }
 
   self.getChunk=function(){
-    var end=start+blockSize;
+    if (start>=file.size) return false;
+    var end=start+chunkSize;
     if (end>file.size) end=file.size;
     if (file.mozSlice) {
       return file.mozSlice(start, end);
@@ -71,6 +100,28 @@ function Uploader(fileElem,url,remotePath,callbacks){
     } else {
       return false;
     }
+  }
+
+  self.uploading=function(){
+    return intervalId!=null;
+  }
+
+  self.fireEvent=function(eventName,params){
+    for (var i in listeners){
+      var l=listeners[i];
+      if (l.eventName==eventName){
+        l.callback(params);
+      }
+    }
+  }
+
+  self.addListener=function(eventName,callback){
+    listeners.push({eventName:eventName,callback:callback});
+    return listeners.length-1;
+  }
+
+  self.removeListener=function(index){
+    listeners[index]=eventHandler.pop();
   }
 }
 
