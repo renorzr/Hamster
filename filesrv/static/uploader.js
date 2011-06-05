@@ -38,7 +38,9 @@ function Uploader(fileElem,url,remotePath,callbacks){
     var elapsed=(new Date()-chunkStartTime);
     var chunkSent=elapsed/EXP_CHUNK_TIME*chunkSize;
     if (chunkSent>chunkSize) chunkSent=chunkSize;
-    self.fireEvent('progress',{sent:start+chunkSent,total:file.size});
+    var sent=start+chunkSent;
+    if (sent>file.size) sent=file.size;
+    self.fireEvent('progress',{sent:sent,total:file.size});
   }
 
   self.uploadChunk=function(){

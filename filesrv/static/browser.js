@@ -21,7 +21,8 @@ function Browser(root_){
       });
 
       $('.upload-button').click(function(){
-        uploader=new Uploader($('#uploader'),'/',path);
+        var file=$('#uploader').get(0).files[0];
+        uploader=new Uploader(file,'/',path);
         uploader.addListener('progress',function(data){
           var percent=Math.floor(data.sent/data.total*100);
           $('.progress').text(percent+'%');
