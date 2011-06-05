@@ -1,6 +1,5 @@
-function Uploader(fileElem,url,remotePath,callbacks){
+function Uploader(file,url,remotePath,callbacks){
   var self=this;
-  var file=fileElem.get(0).files[0];
   var start=0;
   var lastStart=-1;
   var intervalId=null;
@@ -120,6 +119,10 @@ function Uploader(fileElem,url,remotePath,callbacks){
 
   self.removeListener=function(index){
     listeners[index]=eventHandler.pop();
+  }
+
+  self.file=function(){
+    return file;
   }
 }
 
