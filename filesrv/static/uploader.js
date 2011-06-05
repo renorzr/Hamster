@@ -11,7 +11,6 @@ function Uploader(fileElem,url,remotePath,callbacks){
   var MIN_CHUNK_SIZE=1024*1024;
   var listeners=[];
   var xhr;
-  var chunkUploading=false;
   var UPDATE_INTERVAL=1000;
 
   self.check=function(callback){
@@ -23,7 +22,6 @@ function Uploader(fileElem,url,remotePath,callbacks){
 
   self.upload=function(){
     if (!self.uploading())
-      chunkUploading=false;
       intervalId=setInterval(function(){self.uploadChunk();self.updateProgress()},UPDATE_INTERVAL);
   }
 
@@ -44,8 +42,7 @@ function Uploader(fileElem,url,remotePath,callbacks){
   }
 
   self.uploadChunk=function(){
-    if (chunkUploading || lastStart>=start) return;
-    chunkUploading=true;
+    if (lastStart>=start) return;
     lastStart=start
 
     chunkStartTime=new Date();
@@ -75,7 +72,6 @@ function Uploader(fileElem,url,remotePath,callbacks){
         start+=chunk.size;
         self.fireEvent('progress',
             {sent:start,total:file.size,chunkSize:chunkSize,chunkTime:chunkTime});
-        chunkUploading=false;
       }
     }
 

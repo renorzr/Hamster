@@ -46,7 +46,7 @@ def upload(request):
 def check(request):
     path=request.GET.get('path')
     path=getSysPath(path)
-    size=os.path.getsize(path)
+    size=os.path.exists(path) and os.path.getsize(path) or 0
     return JsonResponse({'status':'ok','data':{'received':size}})
 
 def getSysPath(path):
